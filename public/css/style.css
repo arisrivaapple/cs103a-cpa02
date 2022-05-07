@@ -1,0 +1,27 @@
+/*copied*/
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 890px;
+  min-height: 0px; /*dARKER VERSION:#290023 or whatever carniverous purple640055 (though gradients good too)*/
+  background-color: #100013; /* For browsers that do not support gradients */
+  background-image: linear-gradient(#820065,#200014);
+}
+.grad {
+  height: 4000px;
+  background-color: red; /* For browsers that do not support gradients */
+  background-image: linear-gradient(red, yellow);
+}
+.colorbox {
+  background: #8B008B; 
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: auto;
+  min-height: 100px; /*or whatever*/
+}
+a {
+  color: DarkMagenta;
+}
+

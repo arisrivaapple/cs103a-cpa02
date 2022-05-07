@@ -1,0 +1,19 @@
+<!--copied initially but edited-->
+<link rel="stylesheet" href="css/style.css">
+<html>
+<body>
+    <div class="jumbotron">
+        <h1> Task Board </h1>
+        <p> Here is your list of things to do! </p>
+    </div>  
+
+    <div class="d-flex flex-wrap">
+    <% for (task of tasks) { 
+        %>
+        <div class="p-3 m-3 bg-info w-25 border border-primary border-5">   
+            <%= task['task_name']%>
+        </div>
+        <% } %>
+    </div>
+</body>
+</html>

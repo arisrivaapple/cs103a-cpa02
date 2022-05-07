@@ -49,9 +49,14 @@ router.get("/login", (req,res) => {
 router.post('/login',
   async (req,res,next) => {
     try {
-      const {username,passphrase} = req.body
-      const user = await User.findOne({username:username})
-      const isMatch = await bcrypt.compare(passphrase,user.passphrase );
+      const {username,password} = req.body
+      const user = await User.findOne({username})
+      console.log(user.username)
+      console.log(username)
+      console.log(password)
+      console.log(user.password)
+      //console.dir(user)
+      const isMatch = await bcrypt.compare(password,user.password );
 
       if (isMatch) {
         req.session.username = username //req.body
@@ -67,14 +72,18 @@ router.post('/login',
     }
   })
 
-router.post('/signup',
+router.get("/signup", (req,res) => {
+  res.render("signup")
+})
+
+router.post('/signup', //why doesnt this have a page???
   async (req,res,next) =>{
     try {
-      const {username,passphrase,passphrase2,age} = req.body
-      if (passphrase != passphrase2){
+      const {username,password,password2,age} = req.body
+      if (password != password2){
         res.redirect('/login')
       }else {
-        const encrypted = await bcrypt.hash(passphrase, saltRounds);
+        const encrypted = await bcrypt.hash(password, saltRounds);
 
         // check to make sure that username is not already taken!!
         const duplicates = await User.find({username})
@@ -86,7 +95,7 @@ router.post('/signup',
           // the username has not been taken so create a new user and store it in the database
           const user = new User(
             {username:username,
-             passphrase:encrypted,
+             password:encrypted,
              age:age
             })
           
