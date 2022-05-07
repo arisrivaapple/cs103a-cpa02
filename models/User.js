@@ -6,6 +6,7 @@ var userSchema = Schema( {
     username: String,
     password: String,
     email: String,
+    teamRequest: String,
     team: String,
 });
 

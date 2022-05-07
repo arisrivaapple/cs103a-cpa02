@@ -185,12 +185,11 @@ app.get("/newTask", (req, res, next) => {
   res.render("NewTask");
 });
 
-app.get("/team", (req, res, next) => {
-  res.render("Team");
-});
 
 app.get("/team", (req, res, next) => {
-  res.render("team");
+  const user = res.locals.user
+  console.log("at team: " + user.team)
+  res.render("Team");
 });
 
 
@@ -231,7 +230,8 @@ app.post('/teamSearch',
       const team = await Team.findOne({name:search});
       res.locals.team = team;
       res.locals.search = search;
-      
+      const user = res.locals.user
+      user.teamRequest = search
       if (team != null) {
         res.redirect('/joinTeam')
         console.log(team.name)
@@ -250,15 +250,22 @@ app.get("/joinTeam", (req, res, next) => {
   res.render("joinTeam");
 });
 
-app.get("/joinTeamConfirmed", async (req, res, next) => {
-  const team = res.locals.team
-  const search = res.locals.search
-  const user = res.locals.user
-  team.members.push(user);
+app.post("/joinTeamConfirmed", async (req, res, next) => {
+  //const team = res.locals.team
+  console.log("in join team confirmed: ")
+  let user = res.locals.user
+  console.log("in join team confirmed: " + user.teamRequest)
+  const username = res.locals.username
+  const search = user.teamRequest
+  const team = await Team.findOne({name:search})
+  team.members.push(username);
   team.save();
-  await User.updateOne({user}, {
-    team: search
-  });
+  console.log("in join team confirmed: " + user.teamRequest)
+  let userUpdate = await User.findOneAndUpdate({name:username}, {team: search});
+  console.log("in join team confirmed: " + userUpdate)
+  userUpdate = await User.findOne({name:username})
+  console.log("in join team confirmed: " + userUpdate)
+  console.log("in join team confirmed: " + user.team)
   res.redirect("/team");
 });
 
@@ -271,9 +278,9 @@ app.post("/makeTeamConfirmed",
   async (req, res, next) => {
     try {
       console.log("team")
-      const search = res.locals.search
-      const username = res.locals.username
       const user = res.locals.user
+      const search = user.teamRequest
+      const username = res.locals.username
       let newTeam = new Team({
         name: search,
         members:[username]
