@@ -261,10 +261,12 @@ app.post("/joinTeamConfirmed", async (req, res, next) => {
   team.members.push(username);
   team.save();
   console.log("in join team confirmed: " + user.teamRequest)
-  let userUpdate = await User.findOneAndUpdate({name:username}, {team: search});
-  console.log("in join team confirmed: " + userUpdate)
+  user.team = search
+  //user.save();
+  //let userUpdate = await User.findOneAndUpdate({name:username}, {team: search});
+  console.log("in join team confirmed: " + user.team)
   userUpdate = await User.findOne({name:username})
-  console.log("in join team confirmed: " + userUpdate)
+  console.log("in join team confirmed: " + user)
   console.log("in join team confirmed: " + user.team)
   res.redirect("/team");
 });
