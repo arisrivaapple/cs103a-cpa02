@@ -189,7 +189,9 @@ app.get("/team", (req, res, next) => {
   res.render("Team");
 });
 
-app.get("/team", (req, res, next) => {
+app.get("/team", async (req, res, next) => {
+  teamName = res.locals.user.team
+  res.locals.team = await Team.findOne({teamName})
   res.render("team");
 });
 
@@ -238,6 +240,7 @@ app.post('/teamSearch',
         console.log(team.members)
       }
       else {
+        console.log( "search " + search + " is null")
         res.redirect('/makeTeam')
       }
     } catch (e) {
@@ -263,6 +266,10 @@ app.get("/joinTeamConfirmed", async (req, res, next) => {
 });
 
 app.get("/makeTeam", (req, res, next) => {
+  console.log("at makeTeam")
+  const search = res.locals.search
+  console.log(search)
+  
   res.render("makeTeam");
 });
 
@@ -270,14 +277,16 @@ app.post("/makeTeamConfirmed",
   isLoggedIn,
   async (req, res, next) => {
     try {
-      console.log("team")
+      console.log("at make team confirmed")
       const search = res.locals.search
       const username = res.locals.username
       const user = res.locals.user
+      console.log(search)
       let newTeam = new Team({
         name: search,
         members:[username]
       })
+      console.log(newTeam)
       await newTeam.save()
       await User.updateOne({user}, {
         team: search
