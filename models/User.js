@@ -7,7 +7,7 @@ var userSchema = Schema( {
     password: String,
     email: {type: String, default: ''},
     teamRequest: {type: String, default: ''},
-    team: {type: String, default: ''},
+    team: {type: String, default: null},
 });
 
 module.exports = mongoose.model('User', userSchema);
