@@ -37,7 +37,7 @@ const User = require('./models/User')
 // *********************************************************** //
 
 const mongoose = require( 'mongoose' );
-
+//sdfghjkl
 //const mongodb_URI = 'mongodb://localhost:27017/cs103a_todo'
 const mongodb_URI = process.env.mongodb_URI
 
@@ -45,6 +45,7 @@ mongoose.connect( mongodb_URI, { useNewUrlParser: true, useUnifiedTopology: true
 // fix deprecation warnings
 mongoose.set('useFindAndModify', false); 
 mongoose.set('useCreateIndex', true);
+//sdfhjk
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
