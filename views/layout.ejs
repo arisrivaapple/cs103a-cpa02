@@ -44,9 +44,9 @@
                 <a class="nav-link" href="/TaskBoardPage">Taskboard</a>
               </li>
               
-              <% if (user.team != null) {%>
+              <% if (teamName != null && teamName != '') {%>
                 <li class="nav-item">
-                  <a class="nav-link" href="/Team"><%= user.team %></a>
+                  <a class="nav-link" href="/Team"><%= teamName %></a>
                 </li>
               <% } %>
 

@@ -33,10 +33,12 @@ router.use((req,res,next) => {
     res.locals.loggedIn = true
     res.locals.username = req.session.username
     res.locals.user = req.session.user
+    //i feel like i should be able to add the team variable here
   } else {
     res.locals.loggedIn = false
     res.locals.username = null
     res.locals.user = null
+    res.locals.team = null
   }
   next()
 })
@@ -51,23 +53,25 @@ router.post('/login',
     try {
       const {username,password} = req.body
       const user = await User.findOne({username})
-      console.log(user.username)
-      console.log(username)
-      console.log(password)
-      console.log(user.password)
-      //console.dir(user)
-      const isMatch = await bcrypt.compare(password,user.password );
-
-      if (isMatch) {
-        req.session.username = username //req.body
-        req.session.user = user
-        res.redirect('/')
-      } else {
+      let isMatch;
+      if (user != null) {
+        isMatch = await bcrypt.compare(password,user.password );
+        if (isMatch) {
+          req.session.username = username //req.body
+          req.session.user = user
+          res.redirect('/TaskBoardPage')
+        } 
+       else {
         req.session.username = null
         req.session.user = null
+        req.session.team = tempUser.team
+        res.locals.team = tempUser.team
         res.redirect('/login')
+      }}
+      else {
+        res.redirect('/signup')
       }
-    }catch(e){
+    } catch(e){
       next(e)
     }
   })
@@ -79,7 +83,7 @@ router.get("/signup", (req,res) => {
 router.post('/signup', //why doesnt this have a page???
   async (req,res,next) =>{
     try {
-      const {username,password,password2,age} = req.body
+      const {username,password,password2} = req.body
       if (password != password2){
         res.redirect('/login')
       }else {
@@ -96,13 +100,15 @@ router.post('/signup', //why doesnt this have a page???
           const user = new User(
             {username:username,
              password:encrypted,
-             age:age
             })
           
           await user.save()
           req.session.username = user.username
           req.session.user = user
-          res.redirect('/')
+          tempUser = await User.findOne({username:username});
+          req.session.team = tempUser.team
+          res.locals.team = tempUser.team
+          res.redirect('/TaskBoardPage')
         }
         
         
@@ -114,7 +120,7 @@ router.post('/signup', //why doesnt this have a page???
 
 router.get('/logout', (req,res) => {
   req.session.destroy()
-  res.redirect('/');
+  res.redirect('/login');
 })
 
 module.exports = router;
