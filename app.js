@@ -38,9 +38,7 @@ const User = require('./models/User')
 
 const mongoose = require( 'mongoose' );
 
-//const mongodb_URI = String('mongodb+srv://arisriva:DB(h@ydPzM9RkJ-@tirehamburger.p92oq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority')
 //const mongodb_URI = 'mongodb://localhost:27017/cs103a_todo'
-//const mongodb_URI = 'mongodb+srv://arisriva:DB(h@ydPzM9RkJ-@tirehamburger.p92oq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
 const mongodb_URI = process.env.mongodb_URI
 console.log("env vsar: " + process.env.mongodb_URI)
 
