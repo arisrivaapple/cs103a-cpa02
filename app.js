@@ -40,7 +40,6 @@ const mongoose = require( 'mongoose' );
 
 //const mongodb_URI = 'mongodb://localhost:27017/cs103a_todo'
 const mongodb_URI = process.env.mongodb_URI
-console.log("env vsar: " + process.env.mongodb_URI)
 
 mongoose.connect( mongodb_URI, { useNewUrlParser: true, useUnifiedTopology: true } );
 // fix deprecation warnings
