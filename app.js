@@ -63,6 +63,8 @@ db.once('open', function() {console.log("we are connected!!!")});
 )*/
 
 
+
+
   
 
 // *********************************************************** //
@@ -124,8 +126,45 @@ app.use(
 );
 
 // *********************************************************** //
+//  EMailtemplates section
+// *********************************************************** //
+
+var mailOptionsAttachment = {
+  from: 'tirehamburger@gmail.com',
+  to: 'theironstarre@gmail.com',
+  subject: 'This should have an attachment',
+  text: 'That was easy!',
+  attachments: [
+        {   // file on disk as an attachment
+            filename: 'carmen.png',
+            path: 'carmen.png' // stream this file
+        } //more types of attahments demonstrated on : https://www.tutsmake.com/node-js-send-email-through-gmail-with-attachment-example/
+    ]
+}
+
+
+// *********************************************************** //
 //  Defining the routes the Express server will respond to
 // *********************************************************** //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // here is the code which handles all /login /signin /logout routes
@@ -180,7 +219,7 @@ var mailOptions = {
 const sendMail = async (req,res,next) => {
   if (res.locals.loggedIn) {
     try{
-      mail.sendMail(mailOptions, function(error, info){
+      mail.sendMail(mailOptionsAttachment, function(error, info){
         if (error) {
           console.log(error);
         } else {
@@ -246,6 +285,7 @@ app.get("/TaskBoardPage",
 
 app.get("/about", 
   isLoggedIn,
+  sendMail,
   (req, res, next) => {
   res.render("about");
 });
