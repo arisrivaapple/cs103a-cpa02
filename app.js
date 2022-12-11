@@ -15,6 +15,7 @@ const debug = require("debug")("personalapp:server");
 const layouts = require("express-ejs-layouts");
 const axios = require("axios")
 var MongoDBStore = require('connect-mongodb-session')(session);
+var nodemailer = require('nodemailer');
 
 // *********************************************************** //
 //  Loading models
@@ -38,8 +39,8 @@ const User = require('./models/User')
 
 const mongoose = require( 'mongoose' );
 //sdfghjkl
-//const mongodb_URI = 'mongodb://localhost:27017/cs103a_todo'
-const mongodb_URI = process.env.mongodb_URI
+const mongodb_URI = 
+//const mongodb_URI = process.env.mongodb_URI
 
 mongoose.connect( mongodb_URI, { useNewUrlParser: true, useUnifiedTopology: true } );
 // fix deprecation warnings
@@ -61,6 +62,10 @@ db.once('open', function() {console.log("we are connected!!!")});
   }
 )*/
 
+
+
+
+  
 
 // *********************************************************** //
 // Initializing the Express server 
@@ -121,14 +126,52 @@ app.use(
 );
 
 // *********************************************************** //
+//  EMailtemplates section
+// *********************************************************** //
+
+var mailOptionsAttachment = {
+  from: 'tirehamburger@gmail.com',
+  to: 'theironstarre@gmail.com',
+  subject: 'This should have an attachment',
+  text: 'That was easy!',
+  attachments: [
+        {   // file on disk as an attachment
+            filename: 'carmen.png',
+            path: 'carmen.png' // stream this file
+        } //more types of attahments demonstrated on : https://www.tutsmake.com/node-js-send-email-through-gmail-with-attachment-example/
+    ]
+}
+
+
+// *********************************************************** //
 //  Defining the routes the Express server will respond to
 // *********************************************************** //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // here is the code which handles all /login /signin /logout routes
 const auth = require('./routes/auth');
 const { deflateSync } = require("zlib");
 app.use(auth)
+
 
 // middleware to test is the user is logged in, and if not, send them to the login page
 const isLoggedIn = async (req,res,next) => {
@@ -144,6 +187,53 @@ const isLoggedIn = async (req,res,next) => {
   }
   else res.redirect('/login')
 }
+
+/**const sendMail = async (next) => {
+  try{
+    mail.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+  } catch (e) {
+    next(e);
+  }
+}**/
+var mail = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'tirehamburger@gmail.com',
+    pass: 'dmeclgnjznsqcczu'
+  }
+});
+
+var mailOptions = {
+  from: 'tirehamburger@gmail.com',
+  to: 'theironstarre@gmail.com',
+  subject: 'Sending Email via Node.js',
+  text: 'That was easy!'
+};
+
+const sendMail = async (req,res,next) => {
+  if (res.locals.loggedIn) {
+    try{
+      mail.sendMail(mailOptionsAttachment, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+      next()
+    } catch (e) {
+      next(e);
+    }
+  }
+  else res.redirect('/login')
+}
+
 
 // specify that the server should render the views/index.ejs page for the root path
 // and the index.ejs code will be wrapped in the views/layouts.ejs code which provides
@@ -178,12 +268,6 @@ app.get("/EditProfile",
     res.render("EditProfile");
 });
 
-app.get("/editProfile", 
-  isLoggedIn,
-  (req, res, next) => {
-    res.render("EditProfile");
-});
-
 app.get("/TaskBoardPage", 
   isLoggedIn,
   async (req,res,next) => {
@@ -201,6 +285,7 @@ app.get("/TaskBoardPage",
 
 app.get("/about", 
   isLoggedIn,
+  sendMail,
   (req, res, next) => {
   res.render("about");
 });
@@ -345,8 +430,8 @@ app.post("/joinTeamConfirmed",
     res.locals.teamName = search
     console.log("in join team confirmed: " + userUpdate.team)
     res.redirect("/team");
-  
-});
+  }
+);
 
 app.get("/makeTeam", 
   isLoggedIn,

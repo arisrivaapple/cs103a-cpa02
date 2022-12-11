@@ -1,2 +1,2 @@
-$Env.mongodb_URI = 'mongodb://localhost:27017/cs103a_L36'
+$Env.mongodb_URI = 'mongodb+srv://arisriva:c7MZezAIfgbP4urb@tirehamburger.p92oq.mongodb.net/?retryWrites=true&w=majority'
 npm start
