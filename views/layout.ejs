@@ -44,11 +44,7 @@
                 <a class="nav-link" href="/TaskBoardPage">Taskboard</a>
               </li>
               
-              <% if (teamName != null && teamName != '') {%>
-                <li class="nav-item">
-                  <a class="nav-link" href="/Team"><%= teamName %></a>
-                </li>
-              <% } %>
+              
 
               <li class="nav-item">
                 <a class="nav-link" href="/EditProfile">Profile <%= username %></a>
@@ -59,7 +55,7 @@
               </li>
 
 
-              <!--add for user name teams loop-->
+              <!--add for user name teams loop add team name back in-->
             <% } %>
       
           </ul>

@@ -16,7 +16,7 @@ const layouts = require("express-ejs-layouts");
 const axios = require("axios")
 var MongoDBStore = require('connect-mongodb-session')(session);
 var nodemailer = require('nodemailer');
-
+var bodyParser = require('body-parser');
 // *********************************************************** //
 //  Loading models
 // *********************************************************** //
@@ -28,6 +28,7 @@ const Task = require('./models/Task')
 const TaskBoard = require('./models/TaskBoard')
 const Team = require('./models/Team')
 const User = require('./models/User')
+ 
 
 // *********************************************************** //
 //  Loading JSON datasets
@@ -39,10 +40,11 @@ const User = require('./models/User')
 
 const mongoose = require( 'mongoose' );
 //sdfghjkl
-const mongodb_URI = 
+const mongodb_URI = "mongodb+srv://arisriva:c7MZezAIfgbP4urb@tirehamburger.p92oq.mongodb.net/?retryWrites=true&w=majority"
 //const mongodb_URI = process.env.mongodb_URI
-
-mongoose.connect( mongodb_URI, { useNewUrlParser: true, useUnifiedTopology: true } );
+var fs = require('fs');
+require('dotenv/config');
+mongoose.connect(mongodb_URI, { useNewUrlParser: true, useUnifiedTopology: true } );
 // fix deprecation warnings
 mongoose.set('useFindAndModify', false); 
 mongoose.set('useCreateIndex', true);
@@ -97,11 +99,74 @@ app.use(require('express-session')({
   saveUninitialized: true
 }));
 
+// Step 4 - set up EJS
+ //new: https://www.geeksforgeeks.org/upload-and-retrieve-image-on-mongodb-using-mongoose/
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+
 // Here we specify that we will be using EJS as our view engine
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
+ //new: https://www.geeksforgeeks.org/upload-and-retrieve-image-on-mongodb-using-mongoose/
+var multer = require('multer');
+ 
+var storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads')
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + '-' + Date.now())
+    }
+});
+ 
 
+var upload = multer({ storage: storage });
+
+
+// Step 6 - load the mongoose model for Image
+ 
+const imgModel = require('./models/model');
+
+
+
+// Step 7 - the GET request handler that provides the HTML UI
+ 
+app.get('/images', (req, res) => {
+  imgModel.find({}, (err, items) => {
+      if (err) {
+          console.log(err);
+          res.status(500).send('An error occurred', err);
+      }
+      else {
+          res.render('imagesPage', { items: items });
+      }
+  });
+});
+
+
+// Step 8 - the POST handler for processing the uploaded file
+ 
+app.post('/images', upload.single('image'), (req, res, next) => {
+ 
+  var obj = {
+      name: req.body.name,
+      desc: req.body.desc,
+      img: {
+          data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
+          contentType: 'image/png'
+      }
+  }
+  imgModel.create(obj, (err, item) => {
+      if (err) {
+          console.log(err);
+      }
+      else {
+          item.save();
+          res.redirect('/images');
+      }
+  });
+});
 
 // this allows us to use page layout for the views 
 // so we don't have to repeat the headers and footers on every page ...
