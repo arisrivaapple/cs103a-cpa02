@@ -190,40 +190,12 @@ app.use(
   })
 );
 
-// *********************************************************** //
-//  EMailtemplates section
-// *********************************************************** //
 
-var mailOptionsAttachment = {
-  from: 'tirehamburger@gmail.com',
-  to: 'theironstarre@gmail.com',
-  subject: 'This should have an attachment',
-  text: 'That was easy!',
-  attachments: [
-        {   // file on disk as an attachment
-            filename: 'carmen.png',
-            path: 'carmen.png' // stream this file
-        } //more types of attahments demonstrated on : https://www.tutsmake.com/node-js-send-email-through-gmail-with-attachment-example/
-    ]
-}
 
 
 // *********************************************************** //
 //  Defining the routes the Express server will respond to
 // *********************************************************** //
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ///https://pqina.nl/blog/upload-image-with-nodejs/
@@ -275,6 +247,12 @@ const isLoggedIn = async (req,res,next) => {
   }
 }**/
 
+/**EMAILS SECTION */
+// *********************************************************** //
+//  EMailtemplates section
+// *********************************************************** //
+
+
 var mail = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -283,12 +261,53 @@ var mail = nodemailer.createTransport({
   }
 });
 
+//trying new addition here:
 var mailOptions = {
+  from: 'sender@tutsmake.com',
+  to: 'your-email@gmail.com',
+  subject: 'Sending Email using Node.js',
+  text: 'That was easy!',
+  
+}
+
+var mailOptionsAttachment = {
   from: 'tirehamburger@gmail.com',
   to: 'theironstarre@gmail.com',
-  subject: 'Sending Email via Node.js',
-  text: 'That was easy!'
-};
+  subject: 'This should have an attachment',
+  text: 'That was easy!',
+  attachments: [
+        {   // file on disk as an attachment
+            filename: 'carmen.png',
+            path: 'carmen.png' // stream this file
+        } //more types of attahments demonstrated on : https://www.tutsmake.com/node-js-send-email-through-gmail-with-attachment-example/
+    ]
+}
+
+///completion confirmation email section
+
+var captain = "captain-name-here"
+var teamName = "team-name-here"
+var completerTeamMember = "completer-team-member-here"
+var taskName = "task-name-here"
+var taskID = "task-ID-here"
+//link when hosting -- must be intialize AFTER other variables are defined!!!!!!
+var link = "<a href=TireHambuger.com/taskCompletionCaptainConfirmation" + completerTeamMember + taskID + "/>Accept</a>"
+//link when testing
+link = "<a href=localHost:5000/taskCompletionCaptainConfirmation" + completerTeamMember + taskID + "/>Accept</a>"
+
+var completionConfirmationRequestToCaptain = {
+  from: 'tirehamburger@gmail.com',
+  to: 'theironstarre@gmail.com',
+  subject: 'Please review task submission',
+  text: 'Your ' + teamName + " teammate, " + completerTeamMember + ", has submitted task: /n" + taskName + "!/n Please confirm completion by reviewing the attached submission, and clicking the below link to accept. /n/n" + link,
+  html: 'Your ' + teamName + " teammate, " + completerTeamMember + ", has submitted task: /n" + taskName + "!/n Please confirm completion by reviewing the attached submission, and clicking the below link to accept. /n/n" + link,
+  attachments: [
+        {   // file on disk as an attachment
+            filename: 'currentSubmission.png',
+            path: 'currentSubmission.png' // stream this file
+        } //more types of attahments demonstrated on : https://www.tutsmake.com/node-js-send-email-through-gmail-with-attachment-example/
+    ]
+}
 
 const sendMail = async (req,res,next) => {
   if (res.locals.loggedIn) {
@@ -358,21 +377,6 @@ app.get("/EditProfile",
     res.render("EditProfile");
 });
 
-app.get("/TaskBoardPage", 
-  isLoggedIn,
-  async (req,res,next) => {
-    try {
-      let userId = res.locals.user._id;
-      console.log("userid")
-      const tasks = await Task.find({userId:userId});
-      res.locals.tasks = tasks;
-      res.render("TaskBoardPage");
-    } catch (e) {
-      next(e);
-    }
-  }
-)
-
 app.get("/about", 
   isLoggedIn,
   sendMail,
@@ -421,18 +425,133 @@ app.post('/addNewTask',
   async (req,res,next) => {
     console.log("addNewTask")
     try {
-      const {taskName,taskDescription,taskDueDate,taskDueTime,taskWeight} = req.body;
+      const {taskName,taskDescription,taskDueDate,taskDueTime,taskWeight,taskPoints, taskPrize, taskDirectPrize, taskStatusCompleted} = req.body;
+      console.log("taskDirectPrize: " + taskDirectPrize)
+      var taskDirectPrizeBool
+      if (taskDirectPrize === "on") {
+        taskDirectPrizeBool = true
+      } else {
+        taskDirectPrizeBool = false
+      }
+      if (taskStatusCompleted === "on") {
+        taskStatusCompletedBool = true
+      } else {
+        taskStatusCompletedBool = false
+      }
       let newTask = new Task({
         userId: req.session.user._id,
         task_name: taskName,
         task_description: taskDescription,
         task_due_date: taskDueDate,
         task_due_time: taskDueTime,
-        task_weight: taskWeight
+        task_weight: taskWeight,
+        task_points: taskPoints,
+        task_prize: taskPrize,
+        task_direct_prize: taskDirectPrizeBool,
+        task_status_completed: taskStatusCompletedBool,
       })
       console.log("Task")
       await newTask.save()
       console.log("saved")
+      res.redirect('/TaskBoardPage')
+    } catch (e) {
+      next(e);
+    }
+  }
+)
+
+
+app.get("/TaskBoardPage", 
+  isLoggedIn,
+  async (req,res,next) => {
+    try {
+      
+      const userID = res.locals.user._id;
+      const tasks = await Task.find({userId:userID});
+      for (const task of tasks) {
+        task.task_url = "/editTask/?" + "userID=" + task['userId'] + "&" + "taskID=" + task._id;
+        task.task_url_b = "/saveEditedTask/?" + "userID=" + task['userId'] + "&" + "taskID=" + task._id;
+        task.save()
+        console.log("task status: " + task.task_name + ": " + task.task_status_completed)
+      }
+      res.locals.tasks = tasks;
+      res.locals.userID = userID;
+      res.render("TaskBoardPage");
+    } catch (e) {
+      next(e);
+    }
+  }
+)
+
+
+app.get("/editTask/", 
+  isLoggedIn,
+  async (req,res,next) => {
+    try {
+      ///get individual search parameters//: https://www.sitepoint.com/get-url-parameters-with-javascript/
+      var userID = req.query.userID
+      var taskID = req.query.taskID
+      res.locals.userID = userID;
+      res.locals.taskID = taskID;
+      var task = await Task.findOne({_id:taskID});
+      res.locals.task_url_b = task.task_url_b;
+      res.locals.task = task;
+      res.locals.task_name = task.task_name;
+      res.locals.task_description = task.task_description;
+      res.locals.task_due_date = task.task_due_date;
+      res.locals.task_due_time = task.task_due_time;
+      res.locals.task_weight = task.task_weight;
+      res.locals.task_points = task.task_points;
+      res.locals.task_prize = task.task_prize;
+      res.locals.task_direct_prize = task.task_direct_prize;
+      res.locals.task_status_completed = task.task_status_completed;
+      console.log("edit task get taskStatusCompleted: " + task.task_name +": " + task.task_status_completed)
+      res.render("editTask");
+    } catch (e) {
+      next(e);
+    }  
+});
+
+app.post('/saveEditedTask/',
+  isLoggedIn,
+  async (req,res,next) => {
+    try {
+      var taskID = req.query.taskID
+      
+      let thisTask = await Task.findOne({_id:taskID});
+      const {taskName,taskDescription,taskDueDate,taskDueTime,taskWeight, taskPoints, taskPrize, taskDirectPrize, taskStatusCompleted} = req.body;
+      
+      thisTask.task_name = taskName
+      thisTask.task_description = taskDescription
+      thisTask.task_due_date = taskDueDate
+      thisTask.task_due_time = taskDueTime
+      thisTask.task_weight = taskWeight
+      thisTask.task_points = taskPoints
+      thisTask.task_prize = taskPrize
+      var taskDirectPrizeBool = true
+      var taskStatusCompletedBool = true
+      if (taskDirectPrize === "on" || taskDirectPrize == true) {
+        console.log("entered on if statement cdirect")
+        taskDirectPrizeBool = true
+        thisTask.task_direct_prize = true
+      } else {
+        console.log("entered else statement cdirect")
+        taskDirectPrizeBool = false
+      }
+      if (taskStatusCompleted === "on" || taskStatusCompleted == true) {
+        thisTask.task_status_completed = true
+        taskStatusCompletedBool = true
+        console.log("entered on if statement compleyted")
+      } else {
+        taskStatusCompletedBool = false
+        console.log("enteredelse statement compleyted")
+      }
+      thisTask.task_direct_prize = taskDirectPrize
+      thisTask.task_status_completed = taskStatusCompleted
+
+      await thisTask.save()
+      console.log("taskStatusCompleted: " + thisTask.task_status_completed)
+      console.log(thisTask)
       res.redirect('/TaskBoardPage')
     } catch (e) {
       next(e);
@@ -445,7 +564,7 @@ app.post('/teamSearch',
   async (req,res,next) => {
     try {
       const {search} = req.body;
-      console.log(search)
+      
       const team = await Team.findOne({name:search});
       res.locals.team = team;
       res.locals.search = search;
@@ -496,6 +615,33 @@ app.get("/changeTeam",
   } catch (e) {
     next(e)
   }
+});
+
+app.get("/taskCompletionCaptainConfirmation/:userID:taskID",
+  isLoggedIn,
+  async (req,res,next) => {
+  //referenced TaskBoard
+    try {
+      let completerUserID = req.params.userID
+      let taskID = req.params.taskID
+      let taskUpdate = await Task.findOne({ObjectID:taskID});
+      taskUpdate.task_status_completed = true;
+      taskUpdate.save()
+      const taskPrize = taskUpdate.prize
+      if (taskUpdate.directPrize) {
+        const directPrize = True
+      }
+      const completerUser = await Task.findOne({UserID:completerUserID});
+      if (taskUpdate.prize != null){
+        completerUser.prizeChest.add(taskPrize)
+      }
+      completerUser.points += taskUpdate.points
+      completerUser.save()
+      //add team submethod hre? AKA TEam Goal Update
+      res.render("ThanksForConfirming");
+    } catch (e) {
+      next(e)
+    }
 });
 
 app.get("/joinTeam", 
@@ -554,138 +700,6 @@ app.post("/makeTeamConfirmed",
         next(e);
     }
 });
-
-
-
-/*
-
-app.get('/todo',
-  isLoggedIn,   // redirect to /login if user is not logged in
-  async (req,res,next) => {
-    try{
-      let userId = res.locals.user._id;  // get the user's id
-      let items = await ToDoItem.find({userId:userId}); // lookup the user's todo items
-      res.locals.items = items;  //make the items available in the view
-      res.render("toDo");  // render to the toDo page
-    } catch (e){
-      next(e);
-    }
-  }
-  )
-
-  app.post('/todo/add',
-  isLoggedIn,
-  async (req,res,next) => {
-    try{
-      const {title,description} = req.body; // get title and description from the body
-      const userId = res.locals.user._id; // get the user's id
-      const createdAt = new Date(); // get the current date/time
-      let data = {title, description, userId, createdAt,} // create the data object
-      let item = new ToDoItem(data) // create the database object (and test the types are correct)
-      await item.save() // save the todo item in the database
-      res.redirect('/todo')  // go back to the todo page
-    } catch (e){
-      next(e);
-    }
-  }
-  )
-
-  app.get("/todo/delete/:itemId",
-    isLoggedIn,
-    async (req,res,next) => {
-      try{
-        const itemId=req.params.itemId; // get the id of the item to delete
-        await ToDoItem.deleteOne({_id:itemId}) // remove that item from the database
-        res.redirect('/todo') // go back to the todo page
-      } catch (e){
-        next(e);
-      }
-    }
-  )
-    ToDoList routes
-
-*/
-
-/* ************************
-  Functions needed for the course finder routes
-   ************************ 
-
-function getNum(coursenum){
-  // separate out a coursenum 103A into 
-  // a num: 103 and a suffix: A
-  i=0;
-  while (i<coursenum.length && '0'<=coursenum[i] && coursenum[i]<='9'){
-    i=i+1;
-  }
-  return coursenum.slice(0,i);
-}
-function times2str(times){
-  // convert a course.times object into a list of strings
-  // e.g ["Lecture:Mon,Wed 10:00-10:50","Recitation: Thu 5:00-6:30"]
-  if (!times || times.length==0){
-    return ["not scheduled"]
-  } else {
-    return times.map(x => time2str(x))
-  }
-  
-}
-function min2HourMin(m){
-  // converts minutes since midnight into a time string, e.g.
-  // 605 ==> "10:05"  as 10:00 is 60*10=600 minutes after midnight
-  const hour = Math.floor(m/60);
-  const min = m%60;
-  if (min<10){
-    return `${hour}:0${min}`;
-  }else{
-    return `${hour}:${min}`;
-  }
-}
-
-function time2str(time){
-  // creates a Times string for a lecture or recitation, e.g. 
-  //     "Recitation: Thu 5:00-6:30"
-  const start = time.start
-  const end = time.end
-  const days = time.days
-  const meetingType = time['type'] || "Lecture"
-  const location = time['building'] || ""
-
-  return `${meetingType}: ${days.join(",")}: ${min2HourMin(start)}-${min2HourMin(end)} ${location}`
-}
-
-/* ************************
-  Loading (or reloading) the data into a collection
-   ************************ 
-
-// this route loads in the courses into the Course collection
-// or updates the courses if it is not a new collection
-
-app.get('/upsertDB',
-  async (req,res,next) => {
-    //await Course.deleteMany({})
-    for (course of courses){
-      const {subject,coursenum,section,term}=course;
-      const num = getNum(coursenum);
-      course.num=num
-      course.suffix = coursenum.slice(num.length)
-      await Course.findOneAndUpdate({subject,coursenum,section,term},course,{upsert:true})
-    }
-    const num = await Course.find({}).count();
-    res.send("data uploaded: "+num)
-  }
-)
-
-
-*/
-
-
-
-
-
-
-
-
-
 
 // here we catch 404 errors and forward to error handler
 app.use(function(req, res, next) {

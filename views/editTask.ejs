@@ -1,0 +1,36 @@
+<!--copied-->
+<link rel="stylesheet" href="css/style.css">
+<div class="jumbotron">
+    <h1></h1>
+    <p>
+      userID: <%= userID %>
+      taskID: <%= taskID %>
+    </p>
+  </div>
+
+<body>
+<div>
+    <link rel="stylesheet" href="css/style.css">
+
+    <form method="post" action="<%=task_url_b%>">
+        task name: <input type="text" name="taskName" placeholder="<%=task_name%>" value="<%=task_name%>"><br>
+        task description: <input type="text" name="taskDescription" placeholder="<%= task_description%>" value="<%= task_description%>" ><br>
+        due date: <input type="text" name="taskDueDate" placeholder= "<%= task_due_date %>" value= "<%= task_due_date %>" ><br> 
+        due time: <input type="number" name="taskDueTime" placeholder="<%= task_due_time%>" value="<%= task_due_time%>"><br> 
+        weight: <input type="number" name="taskWeight" placeholder="<%= task_weight%>" value="<%= task_weight%>"><br> 
+        taskpoints: <input type="number" name="taskPoints" placeholder="<%= task_points%>" value="<%= task_points%>"><br> 
+        prize: <input type="text" name="taskPrize" placeholder="<%= task_prize%>" value="<%= task_prize%>"><br> 
+        <% if (task_direct_prize) { %>
+          direct prize: <input type="checkbox" name="taskDirectPrize"  value=true checked><br>
+        <%} else { %>
+          direct prize: <input type="checkbox" name="taskDirectPrize" value=true><br>
+        <%}%>
+        <% if (task_status_completed) { %>
+            completed: <input type="checkbox" name="taskStatusCompleted"  value=true checked><br>
+        <%} else { %>
+            completed: <input type="checkbox" name="taskStatusCompleted" value=true ><br>
+        <%}%>
+        <input type="submit" value="Save Item"><br>
+    </form>
+</div>
+</body>
