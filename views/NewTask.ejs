@@ -7,7 +7,17 @@
     task weight: <input type="number" name="taskWeight"><br> 
     taskpoints: <input type="number" name="taskPoints"> <br> 
     prize: <input type="text" name="taskPrize" ><br> 
-    direct prize: <input type="checkbox" name="taskDirectPrize"><br>
-    completion status: <input type="checkbox" name="taskStatusCompleted"><br>  
+    direct prize: 
+        <label for="direct1">False</label>
+        <input type="radio" id:"direct1" name="taskDirectPrize" value=false>
+        <label for="direct2">True</label> 
+        <input type="radio" id:"direct2" name="taskDirectPrize" value=true>
+        <br>
+        completion status: 
+        <label for="complete1"">False</label>
+        <input type="radio" id:"complete1" name="taskCompletionStatus" value=false>
+        <label for="complete2">True</label>
+        <input type="radio" id:"complete2" name="taskCompletionStatus" value=true>
+        <br>
     <input type="submit" value="Save Item"><br>
 </form>

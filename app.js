@@ -471,6 +471,7 @@ app.get("/TaskBoardPage",
       for (const task of tasks) {
         task.task_url = "/editTask/?" + "userID=" + task['userId'] + "&" + "taskID=" + task._id;
         task.task_url_b = "/saveEditedTask/?" + "userID=" + task['userId'] + "&" + "taskID=" + task._id;
+        task.task_delete_url= "/deleteTask/?" + "userID=" + task['userId'] + "&" + "taskID=" + task._id;
         task.save()
         console.log("task status: " + task.task_name + ": " + task.task_status_completed)
       }
@@ -494,6 +495,7 @@ app.get("/editTask/",
       res.locals.userID = userID;
       res.locals.taskID = taskID;
       var task = await Task.findOne({_id:taskID});
+      res.locals.task_delete_url = task.task_delete_url;
       res.locals.task_url_b = task.task_url_b;
       res.locals.task = task;
       res.locals.task_name = task.task_name;
@@ -505,7 +507,8 @@ app.get("/editTask/",
       res.locals.task_prize = task.task_prize;
       res.locals.task_direct_prize = task.task_direct_prize;
       res.locals.task_status_completed = task.task_status_completed;
-      console.log("edit task get taskStatusCompleted: " + task.task_name +": " + task.task_status_completed)
+      
+      console.log("task delete url" + task.task_delete_url)
       res.render("editTask");
     } catch (e) {
       next(e);
@@ -528,24 +531,6 @@ app.post('/saveEditedTask/',
       thisTask.task_weight = taskWeight
       thisTask.task_points = taskPoints
       thisTask.task_prize = taskPrize
-      var taskDirectPrizeBool = true
-      var taskStatusCompletedBool = true
-      if (taskDirectPrize === "on" || taskDirectPrize == true) {
-        console.log("entered on if statement cdirect")
-        taskDirectPrizeBool = true
-        thisTask.task_direct_prize = true
-      } else {
-        console.log("entered else statement cdirect")
-        taskDirectPrizeBool = false
-      }
-      if (taskStatusCompleted === "on" || taskStatusCompleted == true) {
-        thisTask.task_status_completed = true
-        taskStatusCompletedBool = true
-        console.log("entered on if statement compleyted")
-      } else {
-        taskStatusCompletedBool = false
-        console.log("enteredelse statement compleyted")
-      }
       thisTask.task_direct_prize = taskDirectPrize
       thisTask.task_status_completed = taskStatusCompleted
 
@@ -558,6 +543,21 @@ app.post('/saveEditedTask/',
     }
   }
 )
+
+app.post('/deleteTask/',
+  isLoggedIn,
+  async (req,res,next) => {
+    try {
+      var taskID = req.query.taskID
+      let thisTask = await Task.findOne({_id:taskID});
+      await Task.deleteOne(thisTask)
+      res.redirect('/TaskBoardPage')
+    } catch (e) {
+      next(e);
+    }
+  }
+)
+
 
 app.post('/teamSearch',
   isLoggedIn,

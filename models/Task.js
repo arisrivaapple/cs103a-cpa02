@@ -16,6 +16,7 @@ var taskSchema = Schema( {
     task_prize:{type: String, default: null},
     task_url: {type: String, default: null},
     task_url_b: {type: String, default: null},
+    task_delete_url: {type: String, default: null},
 });
 
 module.exports = mongoose.model('Task', taskSchema);
