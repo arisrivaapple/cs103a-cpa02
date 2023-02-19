@@ -338,8 +338,16 @@ app.get("/",
     res.render("Home");
 });
 
+
+app.get("/about", 
+  isLoggedIn,
+  sendMail,
+  (req, res, next) => {
+  res.render("about");
+});
+
 app.post('/upload', (req, res) => {
-  const { image } = req.files;
+  const { image } = req.files; //should be able to add query of a task id here
   console.log(req.files);
 
   if (!image) return res.sendStatus(400);
@@ -350,8 +358,43 @@ app.post('/upload', (req, res) => {
 
   image.mv(__dirname + '/upload/' + image.name);
 
-  res.sendStatus(200);
+  //const queryUploadUrl = "/submitConfirmation/?image_name=" +  image.name + "&taskID=" + 
+  res.redirect('/taskBoardPage')
+
 });
+
+app.get('/uploadSubmit', (req, res) => {
+  isLoggedIn,
+  async (req,res,next) => {
+    try {
+      var taskID = req.query.taskID
+      let thisTask = await Task.findOne({_id:taskID});
+      res.locals.task_name = thisTask.task_name
+      res.locals.task_description = thisTask.task_description
+      res.locals.submitConfirmationUrl = thisTask.submitConfirmationUrl
+      res.redirect('/uploadSubmit')
+    } catch (e) {
+      next(e);
+    }
+  }
+})
+
+
+app.get('/submitTask/', 
+  isLoggedIn,
+  async (req,res,next) => {
+    try {
+      var taskID = req.query.taskID
+      let thisTask = await Task.findOne({_id:taskID});
+      res.locals.task_name = thisTask.task_name
+      res.locals.task_description = thisTask.task_description
+      res.locals.submitConfirmationUrl = thisTask.submitConfirmationUrl
+      res.render("submitConfirmation");
+    } catch (e) {
+      next(e);
+    }
+  }
+)
 
 app.get("/completion", 
   isLoggedIn,
@@ -375,13 +418,6 @@ app.get("/EditProfile",
   isLoggedIn,
   (req, res, next) => {
     res.render("EditProfile");
-});
-
-app.get("/about", 
-  isLoggedIn,
-  sendMail,
-  (req, res, next) => {
-  res.render("about");
 });
 
 app.get("/newReward", 
@@ -471,6 +507,7 @@ app.get("/TaskBoardPage",
       for (const task of tasks) {
         task.task_url = "/editTask/?" + "userID=" + task['userId'] + "&" + "taskID=" + task._id;
         task.task_url_b = "/saveEditedTask/?" + "userID=" + task['userId'] + "&" + "taskID=" + task._id;
+        task.task_submit_url = "/submitTask/?" + "userID=" + task['userId'] + "&" + "taskID=" + task._id;
         task.task_delete_url= "/deleteTask/?" + "userID=" + task['userId'] + "&" + "taskID=" + task._id;
         task.save()
         console.log("task status: " + task.task_name + ": " + task.task_status_completed)
@@ -544,20 +581,38 @@ app.post('/saveEditedTask/',
   }
 )
 
-app.post('/deleteTask/',
+app.get('/submitTask/', 
   isLoggedIn,
   async (req,res,next) => {
     try {
       var taskID = req.query.taskID
       let thisTask = await Task.findOne({_id:taskID});
-      await Task.deleteOne(thisTask)
+      res.locals.task_name = thisTask.task_name
+      res.locals.task_description = thisTask.task_description
+      res.locals.submitConfirmationUrl = thisTask.submitConfirmationUrl
+      res.redirect('/submitConfirmation')
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+app.get('/deleteTask/', 
+  isLoggedIn,
+  async (req,res,next) => {
+    try {
+      var taskID = req.query.taskID
+      let thisTask = await Task.findOne({_id:taskID});
+      console.log("test1    ")
+      console.log("taskID   " + taskID)
+      console.log("thisTask   " + thisTask)
+      await Task.deleteOne({_id:taskID});
       res.redirect('/TaskBoardPage')
     } catch (e) {
       next(e);
     }
   }
-)
-
+);
 
 app.post('/teamSearch',
   isLoggedIn,

@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="css/style.css">
+<h1>Have you completed this task?</h1>
+Please upload evidence here:<br>
+
+<form action="/upload" method="POST" enctype="multipart/form-data">
+    <input type="file" name="image" />
+    <button type="submit">Upload</button>
+</form>
+<a class="btn btn-light" href="<%= task['task_submit_url']%>" role="button"> submit </a>

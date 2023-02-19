@@ -11,8 +11,8 @@
     <% for (task of tasks) { %>
         <%   if (!task['task_status_completed']){ %>
             <div class="p-3 m-3 bg-info w-25 border border-primary border-5">  
-                 <a class="btn btn-light" href="<%= task['task_url']%>" role="button"> <%= task['task_name']%> <%= task['task_completed_status']%></a>
-                 
+                 <a class="btn btn-light" href="<%= task['task_url']%>" role="button"> <%= task['task_name']%></a>
+                 <a class="btn btn-light" href="<%= task['task_submit_url']%>" role="button"> submit </a>
             </div>
         <% } %>
     <% } %>
